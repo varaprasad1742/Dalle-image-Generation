@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text Area Example</title>
+<style>
+  /* Style for textarea */
+  textarea {
+    border: none; /* Remove default border */
+    outline: none; /* Remove outline when focused */
+    resize: none; /* Disable resizing */
+    /* Add any other styling you want */
+    width: 300px;
+    height: 100px;
+    padding: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #f5efef;
+    background-color: transparent; /* Set background to transparent */
+  }
+  
+  /* Blurred background for textarea */
+  .blur-background {
+    background-image: url('ai-image.jpg'); /* Replace with your background image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(5px); /* Adjust blur amount as needed */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Ensure the background is behind the textarea */
+  }
+</style>
+</head>
+<body>
+
+<h2>Text Area Example</h2>
+
+<!-- Blurred background for textarea -->
+<div class="blur-background"></div>
+
+<!-- Text area element -->
+<textarea id="myTextarea" rows="4" cols="50" placeholder="Enter your text here..."></textarea>
+
+</body>
+</html>

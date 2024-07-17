@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DALL-E Web App</title>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-image: url("/static/ai-image.jpg"); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    justify-content: center;    
+    min-height: 100vh;
+  }
+  .container {
+    /* background: rgba(255, 255, 255, 0.3); */
+   
+    width: 90%;
+    max-width: 500px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    position: relative;
+    text-align: center;
+    padding-top: 5%;
+    color: white; 
+    position: relative;
+  }
+  ::-webkit-input-placeholder { 
+            color: rgb(232, 135, 32);
+            font-weight: lighter;
+  }
+  #text {
+    font-size: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .letter {
+    display: inline-block;
+    position: relative;
+    opacity: 0;
+    animation: revealLetter 0.5s forwards; /* Animation for letter reveal */
+  }
+  @keyframes revealLetter {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  #createImage {
+    cursor: pointer;
+    color: white;
+    font-size: 25px;
+    margin-top: 20px;
+  }
+  #createImage:hover{
+    transform: scale(1.1);
+  }
+  #component {
+    display: none;
+    margin-top: 20px;
+    font-size: 16px;
+    padding: 8px;
+    background: none;
+    border-color: white;
+    border-radius: 8px;
+    outline:none;
+    background-color: transparent;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    caret-color: white;
+    color: beige;
+    font-weight: bold;
+  }
+  #generatedImage {
+    display: none;
+    margin-top: 30px;
+    max-width: 100%;
+  }
+  #btn-gen{
+    display: none;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    /* background: rgba(255, 255, 255, 0.3);  */
+    background: transparent;
+    color: rgb(219, 225, 217);
+    height: auto;
+    width: 150px;
+    font-size: 24px;
+    font-weight: bold;
+    border-color: white;
+    padding: 5px 10px;
+    border-radius: 8px;
+  }
+  #btn-gen:hover{
+    transform: scale(1.1);
+  }
+  .loader {
+    border: 8px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 8px solid #3498db;
+    width: 50px;
+    height: 50px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+  }
+  
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .disable-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: none;
+  }
+
+</style>
+</head>
+<body>
+  <div class="loader" id="loader" style="display:none;"></div>
+  <div class="disable-container" id="disableContainer"></div>
+  <div class="container">
+    <div id="text"></div>
+    <div id="createImage"><span id="arrow">&#9658;</span>Create your own image</div>
+    <form id="image-form" action="/image">
+        <textarea name="component" id="component" cols="30" rows="3" placeholder="Enter your prompt and click Generate (E.g: A boy sleeping when it is raining outside)"></textarea>
+        <button type="submit" id="btn-gen">Generate</button>
+      </form>
+    <div id="generatedImage"></div>
+  </div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const createImageElement = document.getElementById('createImage');
+    const componentElement = document.getElementById('component');
+    const generatedImageElement = document.getElementById('generatedImage');
+    const textContainer = document.getElementById('text');
+    const textContent = "Welcome to the new era of AI !!!";
+    const btn_gen=document.getElementById("btn-gen");
+    const loader = document.getElementById("loader");
+    const disableContainer = document.getElementById("disableContainer");
+
+    let currentIndex = 0;
+    let flag = true;
+    
+    function revealNextLetter() {
+      if (currentIndex < textContent.length) {
+        if (textContent[currentIndex] === ' ') {
+          const space = document.createElement('span');
+          space.className = 'letter';
+          space.innerHTML = '&nbsp;';
+          textContainer.appendChild(space);
+        } else {
+          const letter = document.createElement('span');
+          letter.className = 'letter';
+          letter.textContent = textContent[currentIndex];
+          textContainer.appendChild(letter);
+        }
+        currentIndex++;
+        setTimeout(revealNextLetter, 65);
+      }
+    }
+
+    revealNextLetter();
+    function adjustTextareaHeight(textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + 'px'; 
+    }
+
+    const textarea = document.getElementById('component');
+    textarea.addEventListener('input', function() {
+      adjustTextareaHeight(this); 
+    });
+    createImageElement.addEventListener('click', function() {
+      let arrow =document.getElementById("arrow");
+      if (flag){
+        componentElement.style.display = 'inline';
+        btn_gen.style.display="inline";
+        arrow.innerHTML="&#x25BC;";
+        flag=false;
+      }
+      else{
+        componentElement.style.display = 'none';
+        btn_gen.style.display="none";
+        arrow.innerHTML="&#9658;";
+        flag=true;
+      }
+    });
+    const imageForm = document.getElementById('image-form');
+    imageForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      disableContainer.style.display = "block";
+      loader.style.display = "inline-block";
+      const formData = new FormData(imageForm);
+      const response = await fetch('/image', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const responseData = await response.json();
+      disableContainer.style.display = "none";
+      loader.style.display = "none";
+      if (responseData.flag) {        
+        generatedImageElement.innerHTML = '<div ><img id="img-genrd" src="' + responseData.src + '" alt="Generated Image" style="width: 240px; height: 240px;"></div>';
+        generatedImageElement.style.display = 'inline';
+        let img_gen=document.getElementById("img-genrd");
+        img_gen.style.marginTop="10px";
+      } else {
+        alert('Failed to generate image.');
+      }
+    });
+  
+
+  });
+  </script>
+
+</body>
+</html>
